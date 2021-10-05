@@ -1,0 +1,11 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #111;
+}
+
+.header {
+  font-family: sans-serif;
+  text-align: center;
+  color: red;
+}
