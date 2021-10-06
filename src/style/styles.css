@@ -9,3 +9,12 @@ body {
   text-align: center;
   color: red;
 }
+
+.appBar {
+  color: white;
+}
+.menu_items {
+  font-family: sans-serif;
+  color: blueviolet;
+  font-weight: 800;
+}
