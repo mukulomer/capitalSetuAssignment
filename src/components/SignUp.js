@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import {
   Avatar,
@@ -13,7 +13,10 @@ import {
 import { Link } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-
+import authService from "./../service/authService";
+import { ToastContainer, toast } from "react-toastify";
+import { useHistory } from "react-router";
+import "../style/styles.css";
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -49,9 +52,64 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignUp() {
   const classes = useStyles();
+  const [data, setData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: ""
+  });
+  const history = useHistory();
+
+  const handleClick = async () => {
+    try {
+      // let response = await authService.signUp(data);
+      // if(!response.data.status)
+      // {
+      //   toast.error(response.data.message)
+      //   return;
+      // }
+      // toast.success(response.data.message)
+      // history.push("/discover/popular");
+      // history.go(0)
+    } catch (error) {
+      toast.error("exception occured");
+    }
+  };
+
+  const validate = (data) => {
+    if (
+      !data.email.match(
+        /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
+      )
+    ) {
+      toast.error("please add valid email");
+      return false;
+    }
+    return true;
+  };
+
+  const handle_signUp = async () => {
+    try {
+      let isValid = validate(data);
+      if (!isValid) return;
+
+      let response = await authService.signUp(data);
+      if (!response.data.status) {
+        toast.error(response.data.message);
+        return;
+      }
+
+      toast.success(response.data.message);
+      history.push("/discover/popular");
+      history.go(0);
+    } catch (error) {
+      toast.error("exception occured");
+    }
+  };
 
   return (
     <Container component="main" maxWidth="xs">
+      <ToastContainer />
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
@@ -72,6 +130,9 @@ export default function SignUp() {
                 id="firstName"
                 label="First Name"
                 autoFocus
+                onChange={(e) =>
+                  setData({ ...data, firstName: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -83,6 +144,7 @@ export default function SignUp() {
                 label="Last Name"
                 name="lastName"
                 autoComplete="lname"
+                onChange={(e) => setData({ ...data, lastName: e.target.value })}
               />
             </Grid>
             <Grid item xs={12}>
@@ -93,6 +155,8 @@ export default function SignUp() {
                 id="email"
                 label="Email Address"
                 name="email"
+                type="email"
+                onChange={(e) => setData({ ...data, email: e.target.value })}
                 autoComplete="email"
               />
             </Grid>
@@ -105,25 +169,26 @@ export default function SignUp() {
                 label="Password"
                 type="password"
                 id="password"
+                onChange={(e) => setData({ ...data, password: e.target.value })}
                 autoComplete="current-password"
               />
             </Grid>
           </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Sign Up
-          </Button>
-          <Grid container justify="flex-end">
+          {/* <Grid container justify="flex-end">
             <Grid item>
               <Link to="/login">Already have an account? Sign in</Link>
             </Grid>
-          </Grid>
+          </Grid> */}
         </form>
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          className={classes.submit}
+          onClick={handle_signUp}
+        >
+          Sign Up
+        </Button>
       </div>
       <Box mt={5}>
         <Copyright />

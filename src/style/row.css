@@ -36,7 +36,7 @@
 
 .row_large {
   object-fit: contain;
-  max-height: 480px;
+  max-height: 550px;
   padding-left: 10px;
   transition: transform 450ms;
 }
@@ -63,7 +63,7 @@
 
 .row_poster {
   object-fit: contain;
-  max-height: 280px;
+  max-height: 350px;
   padding-left: 10px;
   transition: transform 450ms;
 }

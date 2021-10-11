@@ -9,17 +9,17 @@ import {
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import { Link } from "react-router-dom";
-
+import "react-toastify/dist/ReactToastify.css";
 import { Paper } from "@material-ui/core";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
-import users from "../../data/users";
 import { MIN_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from "../config";
 import authService from "./../service/authService";
 import { Alert } from "@material-ui/lab";
+import { ToastContainer, toast } from "react-toastify";
 
 function Copyright() {
   return (
@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignInSide(props) {
   if (authService.isLoggedIn()) {
-    props.history.push("/home/movies");
+    props.history.push("/discover/popular");
   }
 
   const classes = useStyles();
@@ -102,32 +102,31 @@ export default function SignInSide(props) {
     property === "username" ? validateUsername() : validatePassword();
   };
 
-  const handleLogin = () => {
-    if (isValidUser(account.username, account.password)) {
-      authService.doLogin(account.username);
-      props.history.push("/home/movies");
-    } else {
-      setOpen(true);
+  const handleLogin = async () => {
+    try {
+      let data = await authService.doLogin(account.username, account.password);
+      if (data.data.status) {
+        props.history.push("/discover/popular");
+        props.history.go(0);
+        toast.success(data.data.message);
+      } else {
+        toast.error(data.data.message);
+      }
+    } catch (error) {
+      console.log("exception occured");
     }
-  };
-
-  const isValidUser = (username, password) => {
-    return users.find(
-      (user) => user.username === username && user.password === password
-    );
   };
 
   const validateUsername = () => {
-    const errorCopy = { ...error };
-    if (account.username.includes(" ")) {
-      errorCopy.username = "Username cannot contain a space";
-    } else if (account.username.length < MIN_USERNAME_LENGTH) {
-      errorCopy.username = `Username should be greater than ${MIN_USERNAME_LENGTH} chars`;
-    } else {
-      errorCopy.username = "";
-    }
-
-    setError(errorCopy);
+    // const errorCopy = { ...error };
+    // if (account.username.includes(" ")) {
+    //   errorCopy.username = "Username cannot contain a space";
+    // } else if (account.username.length < MIN_USERNAME_LENGTH) {
+    //   errorCopy.username = `Username should be greater than ${MIN_USERNAME_LENGTH} chars`;
+    // } else {
+    //   errorCopy.username = "";
+    // }
+    // setError(errorCopy);
   };
 
   const validatePassword = () => {
@@ -142,6 +141,7 @@ export default function SignInSide(props) {
 
   return (
     <Grid container component="main" className={classes.root}>
+      <ToastContainer />
       <CssBaseline />
       <Grid item xs={false} sm={4} md={7} className={classes.image} />
       <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -165,6 +165,7 @@ export default function SignInSide(props) {
               id="username"
               label="Username"
               name="username"
+              type="email"
               autoFocus
             />
             <TextField

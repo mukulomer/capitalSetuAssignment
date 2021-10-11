@@ -1,24 +1,16 @@
 import React, { useEffect, useState } from "react";
 import "../style/row.css";
+import { instance_movie } from "../service/axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Axios from "axios";
 
-import axios from "../service/axios";
-
-export default function Row({ title, fetchUrl, isLargeRow }) {
-  const [movies, setMovies] = useState([]);
+export default function Row({ title, fetchUrl, data, isLargeRow, isFav }) {
+  // const [data, setdata] = useState([]);
   const [hide, setHide] = useState(true);
   const [id, setId] = useState("");
   const [isLike, setIsLike] = useState(false);
   const baseUrl = "https://image.tmdb.org/t/p/original/";
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(fetchUrl);
-      console.log(response.data.results);
-      setMovies(response.data.results);
-      return response;
-    }
-    fetchData();
-  }, [fetchUrl]);
 
   function truncate(str, num) {
     if (str.length <= num) {
@@ -31,16 +23,26 @@ export default function Row({ title, fetchUrl, isLargeRow }) {
     setId(data);
   };
 
-  const handleLike = (data) => {
-    setIsLike(!isLike);
-    setId(data.id);
+  const handleLike = async (data) => {
+    try {
+      let movies = await instance_movie.post("api/add_favourites", data);
+      console.log("movies", movies.data);
+      if (movies.data.status) {
+        toast.success("added successfully");
+      }
+      setIsLike(!isLike);
+      setId(data.id);
+    } catch (error) {
+      toast.error("something went wrong");
+    }
   };
 
   return (
     <div>
+      <ToastContainer />
       <h2 className="title">{title}</h2>
       <div className="row_posters">
-        {movies.map((movie) => (
+        {data.map((movie) => (
           <div className={isLargeRow ? "row_large" : "Movie_poster"}>
             <img
               key={movie.id}
@@ -58,10 +60,14 @@ export default function Row({ title, fetchUrl, isLargeRow }) {
               <div className="like_Icon">
                 {" "}
                 <h5 className="row_title">{movie.name || movie.title}</h5>{" "}
-                <p className="like" onClick={() => handleLike(movie)}>
-                  {" "}
-                  {isLike && id === movie.id ? "❤️" : "🤍"}
-                </p>
+                {!isFav ? (
+                  <p className="like" onClick={() => handleLike(movie)}>
+                    {" "}
+                    {isLike && id === movie.id ? "❤️" : "🤍"}
+                  </p>
+                ) : (
+                  ""
+                )}
               </div>
 
               {!hide && id === movie.id ? (

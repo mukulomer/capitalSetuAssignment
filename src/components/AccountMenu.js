@@ -12,16 +12,31 @@ import Tooltip from "@mui/material/Tooltip";
 import PersonAdd from "@mui/icons-material/PersonAdd";
 import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
+import { useHistory } from "react-router";
 
 export default function AccountMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const open = Boolean(anchorEl);
+  const history = useHistory();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("isLoggedIn");
+    history.push("/login");
+    history.go(0);
+  };
+
+  React.useEffect(() => {
+    if (localStorage.getItem("isLoggedIn")) setIsLoggedIn(true);
+  }, []);
+
   return (
     <React.Fragment>
       <Box
@@ -34,11 +49,30 @@ export default function AccountMenu() {
           padding: "10px"
         }}
       >
-        <Typography sx={{ minWidth: 100 }} className="menu_items">
-          Favorites
+        {isLoggedIn ? (
+          <Typography
+            sx={{ minWidth: 100, cursor: "pointer" }}
+            className="menu_items"
+            onClick={() => history.push("/discover/favourites")}
+          >
+            Favourites
+          </Typography>
+        ) : (
+          ""
+        )}
+        <Typography
+          sx={{ minWidth: 100, cursor: "pointer" }}
+          className="menu_items"
+          onClick={() => history.push("/discover/Latest")}
+        >
+          Latest
         </Typography>
-        <Typography sx={{ minWidth: 100 }} className="menu_items">
-          Trending
+        <Typography
+          sx={{ minWidth: 100, cursor: "pointer" }}
+          className="menu_items"
+          onClick={() => history.push("/discover/popular")}
+        >
+          Popular
         </Typography>
         <Tooltip title="Account settings">
           <IconButton onClick={handleClick} size="small" sx={{ ml: 2 }}>
@@ -81,30 +115,26 @@ export default function AccountMenu() {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem>
-          <Avatar /> Profile
-        </MenuItem>
-        <MenuItem>
           <Avatar /> My account
         </MenuItem>
         <Divider />
-        <MenuItem>
-          <ListItemIcon>
-            <PersonAdd fontSize="small" />
-          </ListItemIcon>
-          Add another account
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
+        {isLoggedIn ? (
+          <MenuItem onClick={() => handleLogout()}>
+            <ListItemIcon>
+              <Logout fontSize="small" />
+            </ListItemIcon>
+            Logout
+          </MenuItem>
+        ) : (
+          <>
+            <MenuItem onClick={() => history.push("/logIn")}>
+              <Avatar /> SignIn
+            </MenuItem>
+            <MenuItem onClick={() => history.push("/signup")}>
+              <Avatar /> SignUp
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </React.Fragment>
   );
